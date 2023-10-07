@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="org.iclass.rest.dao.BookUserMapper">
+ 	<select id="login" resultType="BookUser">
+ 		select * 
+ 		from 
+ 			bookuser
+		where id=#{id} and password = #{password}
+ 	</select>
+	<select id="selectOne" resultType="BookUser">
+ 		select *
+ 		from
+ 			bookuser
+		where id=#{id}
+ 	</select>
+	<select id="isExist" resultType="int">
+		select count(*)
+		from
+		    BOOKUSER
+		where id=#{id}
+	</select>
+ 	<insert id="insert">
+ 		insert into bookuser
+ 		values
+ 			(#{id},#{name},#{email},#{birth},sysdate,#{password},0,#{subjectStr,jdbcType=VARCHAR})
+ 	</insert>
+	<update id="changeEmail">
+		update BOOKUSER
+		set email=#{email}
+		where id=#{id}
+	</update>
+
+	<delete id="delete">
+		delete from BOOKUSER where id=#{id}
+	</delete>
+
+	<update id="changeBirth">
+		update BOOKUSER
+		set birth=#{birth}
+		where id=#{id}
+	</update>
+	<update id="changePassword">
+		update BOOKUSER
+		set password=#{password}
+		where id=#{id}
+	</update>
+
+
+	<select id="selectAll" resultType="BookUser">
+		select * from BOOKUSER order by name
+	</select>
+ </mapper>
+
+ 
+ 
+ 
+ 
