@@ -13,11 +13,10 @@ public interface BookUserMapper {
     BookUser selectOne(String id);
     int isExist(String id);
     int insert(BookUser bookUser);
-    int changeEmail(Map<String, String> map);
+    int changeOneField(Map<String , Object> map);
 
+    int changeMany(BookUser bookUser);
     int delete(String id);
-    int changeBirth(Map<String, String> map);
-    int changePassword(Map<String, String> map);
     List<BookUser> selectAll();
 
 }
