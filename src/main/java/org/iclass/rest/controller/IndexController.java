@@ -12,11 +12,6 @@ public class IndexController {
 		return "index";			//index.html
 	}
 	
-	@GetMapping("/admin")
-	public void admin() {
-	}
-	
-	
 	@GetMapping("/join")
 	public void join() {
 		

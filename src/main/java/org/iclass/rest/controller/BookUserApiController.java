@@ -3,15 +3,11 @@ package org.iclass.rest.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import lombok.RequiredArgsConstructor;
 import org.iclass.rest.dao.BookUserMapper;
 import org.iclass.rest.dto.BookUser;
 import org.springframework.web.bind.annotation.*;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,63 +21,58 @@ public class BookUserApiController {
 
 	private final BookUserMapper bookUserMapper;
 
-	@GetMapping("/admin")
+	@GetMapping("/admin/bookusers")
 	public List<BookUser> members() {
 		List<BookUser> list = bookUserMapper.selectAll();
-		
+
 		return list;
 	}
-	
-	@GetMapping("/bookuser/{id}")
-	public BookUser bookuser(@PathVariable String id) {
-		BookUser bookUser = bookUserMapper.selectOne(id);
-		if (bookUser==null) throw new NoSuchElementException();
-		return bookUser;
-	}
 
-	@GetMapping("/bookuser/is/{id}")
-	public Map<String, Boolean> isExist(@PathVariable String id) {
-		int count = bookUserMapper.isExist(id);
-		Map<String, Boolean> resultMap = new HashMap<>();
-		resultMap.put("isExist", (count==1));
-
-		return resultMap;
-	}
-
+	// 요청에는 헤더와 바디가 있습니다. @RequestBody는 bookUser 가 요청의 바디라고 알려줍니다.
+	// -> 클라이언트가 보낸 json 문자열을 자바 객체로 자동 변환 (역직렬화)
 	@PostMapping("/bookuser")
-	public Map<String,Integer> save(@RequestBody @Valid BookUser bookUser)  {
-		log.info(">>>>>>> request body : {}",bookUser);
-		bookUser.setSubjectStr();
+	public Map<String,Integer> save(@RequestBody @Valid BookUser bookUser){
+		log.info(">>>>>>> request body : {}", bookUser);
+
 		int count = bookUserMapper.insert(bookUser);
-		Map<String, Integer> resultMap = new HashMap<>();
-		resultMap.put("count", count);
+		Map<String,Integer> resultMap = new HashMap<>();   // 처리 결과를 응답하기 위한 Map
+		resultMap.put("count",count);
 
 		return resultMap;
 	}
 
-	@PatchMapping("/email/{id}")
-	public Map<String,Integer> chageEmail(@PathVariable String id,@RequestBody Map<String,String> map) {
-		map.put("id",id);		//경로 변수값 id 를 Map 의 id 와 일치시키기
-		int count = bookUserMapper.changeEmail(map);
-		if(count==0) throw new NoSuchElementException();
-		log.info("id count :{}",count);
-		Map<String, Integer> resultMap = new HashMap<>();
-		resultMap.put("count", count);
+	@GetMapping("/bookuser/{id}")
+	public BookUser selectOne(@PathVariable String id){
+		BookUser bookUser = bookUserMapper.selectOne(id);
 
-		return resultMap;
+		log.info(">>>>>>> path variable id : {}",id);
+
+		return bookUser;   // bookUser DTO 를 json 문자열로 변환시켜 전달합니다. (직렬화)
 	}
 
 	@DeleteMapping("/bookuser/{id}")
-	public Map<String,Integer> delete(@PathVariable String id) {
-		int count = bookUserMapper.delete(id);
-		Map<String, Integer> resultMap = new HashMap<>();
-		resultMap.put("count", count);
+	public int delete(@PathVariable String id){
 
-		return resultMap;
+		int count = bookUserMapper.delete(id);
+
+		log.info(">>>>>> path variable id : {}", id);
+
+		return count;
 	}
-	
-	
-	
-	
-	
+
+   /* 이것도 가능
+   @DeleteMapping("/bookuser/{id}")
+
+   public Map<String,Integer>  delete(@PathVariable String id){
+
+      int count = bookUserMapper.delete(id);
+
+      Map<String,Integer> resultMap = new HashMap<>();   // 처리 결과를 응답하기 위한 Map
+      resultMap.put("count",count);
+
+      log.info(">>>>>> path variable id : {}", id);
+
+      return resultMap;
+   }*/
+
 }

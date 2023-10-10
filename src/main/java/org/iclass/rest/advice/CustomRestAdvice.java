@@ -16,12 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@RestControllerAdvice
+@RestControllerAdvice       //AOP 기능으로 구현된 오류처리 부가 기능을 구현한 Advice 클래스로 정의
 @Log4j2
 public class CustomRestAdvice {
-    //RestController 에서 발생하는 예외를 json 형식으로 전달하기
-    @ExceptionHandler(BindException.class)
-    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
+    //Controller 에서 발생하는 예외를 json 형식으로 전달하기
+    
+    //Exception 처리하는 핸들러 메소드 정의 : BindException 이 발생하면 처리하는 메소드
+    @ExceptionHandler(BindException.class) //BindException 이 발생하면 처리하는 메소드
+    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)  //응답코드 설정 417 (서버오류)
     public ResponseEntity<Map<String, String>> handleBindException(BindException e) {
         log.error(e);
         Map<String, String> errorMap = new HashMap<>();
@@ -35,7 +37,7 @@ public class CustomRestAdvice {
             return ResponseEntity.badRequest().body(errorMap);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ExceptionHandler(DataIntegrityViolationException.class)    //DataIntegrityViolationException 이 발생하면 처리하는 메소드
     @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
     public ResponseEntity<Map<String,String>> handlerFKException(Exception e){
         log.error(e);
@@ -46,14 +48,4 @@ public class CustomRestAdvice {
 
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    @ResponseStatus(HttpStatus.EXPECTATION_FAILED)
-    public ResponseEntity<Map<String,String>> handlerNoSuchEleException(NoSuchElementException e){
-        log.error(e);
-        Map<String, String> errorMap = new HashMap<>();
-        errorMap.put("time", " " + System.currentTimeMillis());
-        errorMap.put("message", "존재하지 않는 리소스 입니다.");
-        return ResponseEntity.badRequest().body(errorMap);
-
-    }
 }
