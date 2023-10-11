@@ -8,6 +8,7 @@ const clear = function () {
     document.querySelector('#regdate').value = ''
     document.querySelectorAll('.subjects').forEach(item => item.checked = false)
     document.querySelector('#default').innerHTML = `<div class="card-header" id="chatBot">나는 메세지봇입니다.</div>`
+    document.querySelector('#idMessage').innerHTML = `<span class="text-sm" ></span>`
 }
 
 document.querySelector('#clear').addEventListener('click', clear)
@@ -81,11 +82,15 @@ const selectOne = function () {
             const subjectAll = bookuser.subjects;       //만화,소설
             //select한 사용자의 관심분야가 subjects 각 체크박스 요소의 value 를 포함하고 있는지 
             // 각각 비교하여 checked 를 true 또는 false 로 설정하기
+            arrSubject.splice(0,arrSubject.length)
             document.querySelectorAll('.subjects').forEach(item => {
-                if (subjectAll != null && subjectAll.includes(item.value)) item.checked = true;
+                if (subjectAll != null && subjectAll.includes(item.value)){
+                    item.checked = true;
+                    arrSubject.push(item.value)       //조회한 관심분야로 배열 초기화
+            }
                 else item.checked = false
             })
-        } else {
+        }else {
             console.error('오류1', xhr.status, xhr.response)
             console.error('오류2', xhr.response)
         }
@@ -141,15 +146,15 @@ const idcheck = function (){
             //서버 응답 exist 값으로 isValidId 저장. 존재하면 새로운 회원은 사용할 수 없는 아이디
             isValid = !result.exist       //result.exist 는 true 또는 false를 리턴한다.
             if (isValid) {
-                document.querySelector('#idMessage').innerHTML
+                document.querySelector('#idMessage > span').innerHTML
                     = '사용할 수 있는 아이디 입니다.'
-                document.querySelector('#idMessage').style.color = 'green'
+                document.querySelector('#idMessage > span').style.color = 'green'
                 // userid = id
 
             } else {
-                document.querySelector('#idMessage').innerHTML
+                document.querySelector('#idMessage > span').innerHTML
                     = '존재하는 아이디입니다. 다른 아이디를 사용해주세요.'
-                document.querySelector('#idMessage').style.color = 'red'
+                document.querySelector('#idMessage > span').style.color = 'red'
             }
         }else {
                 console.error('오류', xhr.status, xhr.response)
@@ -227,3 +232,78 @@ const save = function () {      //리터럴 형식의 함수 선언: 끌어올�
     arrSubject.splice(0, arrSubject.length)      //배열 비우기. splice 요소 삭제(인덱스 start 부터 end 까지)
 }
 document.querySelector('#save').addEventListener('click', save)
+
+/////////////////////////////////////////////////////////////////////////////////
+//실제 프로젝트 할 때는 패스워드, 이메일 변경 1개 필드 변경할 때 - 모달을 이용해서 입력값 받기
+const changeOneField = function (e){
+    e.stopPropagation();
+    const target = e.target
+    if (target.tagName!='BUTTON') return
+    const field = target.getAttribute("data-num")
+    const id = document.querySelector('#id').value      //where 에 필요한 id
+    let value = ''
+    if(field=='subjects')       //변경하려는 필드가 '관심분야' 일 때
+        value = arrSubject.toString()
+    else
+        value = document.getElementById(field).value    //field 는 변수명이다.
+
+    console.log("field:",field)
+    console.log("value:",value)
+
+    const jsObj = {id:id}       //id 첫번째는 프로퍼티이름. 두번째는 변수명
+    jsObj[field] = value                //jsObj 객체에 새로운 프로퍼티 field 와 그 값 추가
+    console.log("object 중간 확인 : ", jsObj)
+
+    const jsStr = JSON.stringify(jsObj)
+    console.log(jsStr)
+
+    const xhr = new XMLHttpRequest()
+    xhr.open('PATCH','/api/bookuser/'+field+'/'+id)
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+    xhr.send(jsStr)      //5. 요청 전송. POST에서는  body와 함께 보냅니다.
+    xhr.onload=function(){               //요청에 대한 응답받았을 때  onload 이벤트 핸들러 함수
+        const resultObj = JSON.parse(xhr.response);
+        if(xhr.status === 200 || xhr.status ===201){
+            if(resultObj.count===1) {
+                document.querySelector('.card-header').innerHTML = '회원 \'' + id + '\'의 \'' + resultObj.field + '\' 수정되었습니다.'
+                document.querySelector('.card-header').style.color = 'orange'
+            }
+        }else {
+            console.log('오류1-',xhr.response)
+            console.log('오류2-',xhr.status)
+            const values = Object.values(resultObj);
+            console.log(values)
+            let resultMsg =''
+            values.forEach(msg =>
+                resultMsg += msg +"<br>")
+
+            document.querySelector('.card-header').innerHTML = resultMsg
+        }
+    }
+}
+document.querySelector('.card-body').addEventListener('click',changeOneField)
+
+/////////////////////////////////////////////////////////////////////////////////
+
+//삭제
+const deleteId = function () {
+    const id = document.querySelector('#id').value
+    const xhr = new XMLHttpRequest();
+    xhr.open('delete', '/api/bookuser/' + id)
+    xhr.send()
+    xhr.onload = function () {
+
+        if (xhr.status === 200 || xhr.status === 201) {
+            const bookuser = JSON.parse(xhr.response);
+        }else {
+            console.error('오류1', xhr.status, xhr.response)
+            console.error('오류2', xhr.response)
+        }
+    } //onload end
+}
+document.querySelector('#delete').addEventListener('click', deleteId)
+
+
+
+

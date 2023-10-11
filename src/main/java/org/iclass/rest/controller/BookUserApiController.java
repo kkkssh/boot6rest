@@ -54,6 +54,28 @@ public class BookUserApiController {
 		return resultMap;   // map 은 key? : true
 	}
 
+	@PatchMapping("/bookuser/{field}/{id}")
+	public Map<String,Object> changeOneField (@PathVariable String field,
+											   @PathVariable String id,
+											   @RequestBody @Valid BookUser bookUser){		//데이터는 1개이지만 검증을 위해
+
+		log.info("bookUser{}",bookUser);
+		Map<String, Object> map = new HashMap<>();
+		map.put("field",field);
+		map.put("id",id);
+		//map 저장해야할 남은 하나의 파라미터를 해결해보세요
+		switch (field){		//최근 버전에서만 사용 가능한 롬복형 스위치 문
+			case "email" -> map.put("value", bookUser.getEmail());
+			case "password" -> map.put("value", bookUser.getPassword());
+			case "birth" -> map.put("value", bookUser.getBirth());
+			case "subjects" -> map.put("value", bookUser.getSubjects());
+		}
+		int count = bookUserMapper.changeOneField(map);
+		map.put("count",count);
+		return map;
+	}
+
+
 	@DeleteMapping("/bookuser/{id}")
 	public int delete(@PathVariable String id){
 		int count = bookUserMapper.delete(id);
@@ -63,16 +85,11 @@ public class BookUserApiController {
 
    /* 이것도 가능
    @DeleteMapping("/bookuser/{id}")
-
    public Map<String,Integer>  delete(@PathVariable String id){
-
       int count = bookUserMapper.delete(id);
-
       Map<String,Integer> resultMap = new HashMap<>();   // 처리 결과를 응답하기 위한 Map
       resultMap.put("count",count);
-
       log.info(">>>>>> path variable id : {}", id);
-
       return resultMap;
    }*/
 
