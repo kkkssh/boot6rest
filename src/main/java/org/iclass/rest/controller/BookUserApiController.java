@@ -24,7 +24,6 @@ public class BookUserApiController {
 	@GetMapping("/admin/bookusers")
 	public List<BookUser> members() {
 		List<BookUser> list = bookUserMapper.selectAll();
-
 		return list;
 	}
 
@@ -33,30 +32,32 @@ public class BookUserApiController {
 	@PostMapping("/bookuser")
 	public Map<String,Integer> save(@RequestBody @Valid BookUser bookUser){
 		log.info(">>>>>>> request body : {}", bookUser);
-
 		int count = bookUserMapper.insert(bookUser);
 		Map<String,Integer> resultMap = new HashMap<>();   // 처리 결과를 응답하기 위한 Map
 		resultMap.put("count",count);
-
 		return resultMap;
 	}
 
 	@GetMapping("/bookuser/{id}")
 	public BookUser selectOne(@PathVariable String id){
 		BookUser bookUser = bookUserMapper.selectOne(id);
-
 		log.info(">>>>>>> path variable id : {}",id);
-
 		return bookUser;   // bookUser DTO 를 json 문자열로 변환시켜 전달합니다. (직렬화)
+	}
+
+	@GetMapping("/bookuser/check/{id}")
+	public Map<String,Boolean> check (@PathVariable String id){
+		log.info(">>>>>>> path variable id : {}",id);
+		int count = bookUserMapper.isExist(id);
+		Map<String, Boolean> resultMap = new HashMap<>();
+		resultMap.put("exist",count==1);
+		return resultMap;   // map 은 key? : true
 	}
 
 	@DeleteMapping("/bookuser/{id}")
 	public int delete(@PathVariable String id){
-
 		int count = bookUserMapper.delete(id);
-
 		log.info(">>>>>> path variable id : {}", id);
-
 		return count;
 	}
 
